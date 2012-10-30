@@ -23,7 +23,7 @@ import util
 import visualiser
 
 
-def vizmap(target, size=(12,10), num_subplots=None, cmap=None,
+def vizmap(target, size=(12,10), num_subplots=None, cmap=None, pad=None,
            constraints=None, raw=True, callback=None):
     """
     Visualise latlon slices.
@@ -38,11 +38,15 @@ def vizmap(target, size=(12,10), num_subplots=None, cmap=None,
         * num_subplots    -    Subplot grid layout, such as (9,9).
                                Decided automatically if None.
         * cmap            -    A matplotlib.colors.Colormap passed to pcolormesh.
+        * pad             -    Distance between plot and colorbar.
         * constraints     -    Iris loading constraints.
         * raw             -    Use iris.load_raw() when target is a filespec.
         * callback        -    Run this callback for each loaded cube (pre merge).
         
     """
+    
+    if pad is None:
+        pad=0.03
     
     # Cube
     if isinstance(target, iris.cube.Cube):
@@ -66,7 +70,7 @@ def vizmap(target, size=(12,10), num_subplots=None, cmap=None,
     else:
         raise ValueError("Please provide cube(s) or filename(s)")
 
-    viz = visualiser.Visualiser(slice_iterator, size, num_subplots, cmap)
+    viz = visualiser.Visualiser(slice_iterator, size, num_subplots, cmap, pad)
     viz._viz_slices()
 
 
@@ -74,8 +78,8 @@ if __name__ == "__main__":
 
     folder = "/net/home/h05/itbb/git/vizmap/sample_data/aviation/"
     filespec = [folder+"global.grib1", folder+"wave.grib1", folder+"winduv.grib2"]
-#    vizmap(filespec, callback=util.rename_unknown)
-#    vizmap(filespec, callback=util.rename_unknown, num_subplots=(1,1))
-#    vizmap(filespec, callback=util.rename_unknown, num_subplots=(2,2))
-#    vizmap(filespec, callback=util.rename_unknown, num_subplots=(3,3))
+    vizmap(filespec, callback=util.rename_unknown)
+    vizmap(filespec, callback=util.rename_unknown, num_subplots=(1,1))
+    vizmap(filespec, callback=util.rename_unknown, num_subplots=(2,2))
+    vizmap(filespec, callback=util.rename_unknown, num_subplots=(3,3))
     vizmap(filespec, callback=util.rename_unknown, num_subplots=(4,4))

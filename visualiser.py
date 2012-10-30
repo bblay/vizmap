@@ -23,39 +23,39 @@ import iris.quickplot as qplt
 import numpy
 
 
-def _viz_slice(slice, subplot, cmap):
-    # Plot a latlon slice in a given subplot position.
-    ax = plt.subplot(*subplot)
-    
-    # If we're using pcolormesh we need bounds
-    if not slice.coord("latitude").has_bounds():
-        slice.coord("latitude").guess_bounds()
-        slice.coord("longitude").guess_bounds()
-    
-    # How many ticks along the colourbar?
-    # Depends on the number of subplots.
-    if subplot[0] == 1:
-        num_ticks = None
-    elif subplot[0] == 2:
-        num_ticks = 8
-    elif subplot[0] == 3:
-        num_ticks = 6
-    else:
-        num_ticks = 5
-    
-    qplt.pcolormesh(slice, num_ticks=num_ticks)
-    plt.gca().coastlines()
-
-
 class Visualiser(object):
     """Plots latlon slices from a sequence of cubes in an nxn grid."""
     
-    def __init__(self, slices, size, num_subplots, cmap):
+    def __init__(self, slices, size, num_subplots, cmap, pad):
         self.slices = slices
         self.size = size
         self.num_subplots = num_subplots
         self.cmap = cmap
+        self.pad = pad
         self.fig = plt.figure(figsize=self.size)
+
+    def _viz_slice(self, slice, subplot):
+        # Plot a latlon slice in a given subplot position.
+        ax = plt.subplot(*subplot)
+        
+        # If we're using pcolormesh we need bounds
+        if not slice.coord("latitude").has_bounds():
+            slice.coord("latitude").guess_bounds()
+            slice.coord("longitude").guess_bounds()
+        
+        # How many ticks along the colourbar?
+        # Depends on the number of subplots.
+        if subplot[0] == 1:
+            num_ticks = None
+        elif subplot[0] == 2:
+            num_ticks = 8
+        elif subplot[0] == 3:
+            num_ticks = 6
+        else:
+            num_ticks = 5
+        
+        qplt.pcolormesh(slice, cmap=self.cmap, num_ticks=num_ticks, pad=self.pad)
+        plt.gca().coastlines()
         
     def _viz_slices(self):
         # Add the keypress handler and show the window
@@ -96,7 +96,7 @@ class Visualiser(object):
         # TODO: Subplot multiprocessing doesn't work. Raise a mpl issue?
         for i, slice in enumerate(bunch):
             subplot = self.num_subplots + tuple([i+1])
-            _viz_slice(slice, subplot, self.cmap)
+            self._viz_slice(slice, subplot)
     
         print "Plotted {} slices in {:.1f}s".format(len(bunch), time.time() - start_time)
         
